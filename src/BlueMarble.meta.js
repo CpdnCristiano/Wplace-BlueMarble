@@ -8,8 +8,8 @@
 // @supportURL   https://discord.gg/tpeBPy46hf
 // @homepageURL  https://github.com/CpdnCristiano/Wplace-BlueMarble/tree/better-wplace
 // @icon         https://raw.githubusercontent.com/CpdnCristiano/Wplace-BlueMarble/better-wplace/dist/assets/Favicon.png
-// @updateURL    https://raw.githubusercontent.com/CpdnCristiano/Wplace-BlueMarble/better-wplace/dist/BlueMarble.user.js
-// @downloadURL  https://raw.githubusercontent.com/CpdnCristiano/Wplace-BlueMarble/better-wplace/dist/BlueMarble.user.js
+// @updateURL    https://github.com/CpdnCristiano/Wplace-BlueMarble/raw/refs/heads/better-wplace/dist/BlueMarble.user.js
+// @downloadURL  https://github.com/CpdnCristiano/Wplace-BlueMarble/raw/refs/heads/better-wplace/dist/BlueMarble.user.js
 // @run-at       document-start
 // @match        *://*.wplace.live/*
 // @grant        GM_getResourceText
