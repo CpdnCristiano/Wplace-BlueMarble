@@ -239,11 +239,72 @@ stylesheetLink.onload = function () {
 };
 document.head.appendChild(stylesheetLink);
 
+// Função para criar botão de restore quando o overlay está oculto
+function createRestoreButton() {
+  // Remove botão existente se houver
+  const existingButton = document.getElementById('bm-restore-button');
+  if (existingButton) {
+    existingButton.remove();
+  }
+
+  const restoreButton = document.createElement('button');
+  restoreButton.id = 'bm-restore-button';
+  restoreButton.innerHTML = '🔵'; // Ícone do Blue Marble
+  restoreButton.title = 'Show Blue Marble';
+  restoreButton.style.cssText = `
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: #4a90e2;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 999999;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+  `;
+
+  restoreButton.addEventListener('click', () => {
+    const overlay = document.getElementById('bm-overlay');
+    const toggleButton = document.getElementById('bm-button-toggle-visibility');
+    if (overlay && toggleButton) {
+      overlay.style.display = 'block';
+      toggleButton.innerHTML = '👁';
+      toggleButton.title = 'Hide Blue Marble';
+      restoreButton.remove();
+      // Usar a instância do overlay para mostrar status se disponível
+      const overlayInstance = window.overlayInstance;
+      if (overlayInstance && typeof overlayInstance.handleDisplayStatus === 'function') {
+        overlayInstance.handleDisplayStatus('Blue Marble shown!');
+      }
+    }
+  });
+
+  restoreButton.addEventListener('mouseenter', () => {
+    restoreButton.style.transform = 'scale(1.1)';
+    restoreButton.style.background = '#357abd';
+  });
+
+  restoreButton.addEventListener('mouseleave', () => {
+    restoreButton.style.transform = 'scale(1)';
+    restoreButton.style.background = '#4a90e2';
+  });
+
+  document.body.appendChild(restoreButton);
+}
+
 // CONSTRUCTORS
 const observers = new Observers(); // Constructs a new Observers object
 const overlay = new Overlay(name, version); // Constructs a new Overlay object
 const templateManager = new TemplateManager(name, version, overlay); // Constructs a new TemplateManager object
 const apiManager = new ApiManager(templateManager); // Constructs a new ApiManager object
+
+// Disponibilizar overlay globalmente para o botão de restore
+window.overlayInstance = overlay;
 
 overlay.setApiManager(apiManager); // Sets the API manager
 
@@ -684,11 +745,17 @@ function buildOverlayMain() {
               button.innerHTML = '👁';
               button.title = 'Hide Blue Marble';
               instance.handleDisplayStatus('Blue Marble shown!');
+              // Remove o botão de restore se existir
+              const restoreButton = document.getElementById('bm-restore-button');
+              if (restoreButton) {
+                restoreButton.remove();
+              }
             } else {
               overlay.style.display = 'none';
               button.innerHTML = '🙈';
               button.title = 'Show Blue Marble';
-              // Não mostra status quando oculto pois o usuário não verá
+              // Criar botão de restore quando ocultar
+              createRestoreButton();
             }
           }
         });
