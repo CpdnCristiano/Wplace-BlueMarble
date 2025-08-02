@@ -574,7 +574,24 @@ function buildOverlayMain() {
       }
     )
     .buildElement()
-    // .addButton({'id': 'bm-button-disable', 'textContent': 'Disable'}).buildElement()
+    .addButton(
+      { id: 'bm-button-disable', textContent: 'Disable' },
+      (instance, button) => {
+        button.onclick = () => {
+          // Remove template overlay
+          templateManager.disableTemplate();
+          
+          // Clear stats display
+          const statsContainer = document.getElementById('bm-contain-stats');
+          if (statsContainer) {
+            statsContainer.style.display = 'none';
+          }
+          
+          instance.handleDisplayStatus('Template disabled!');
+        };
+      }
+    )
+    .buildElement()
     .buildElement()
     .addDiv({ id: 'bm-contain-stats', style: 'display: none;' })
     .addHeader(3, { textContent: 'Template Statistics' })
@@ -651,6 +668,33 @@ function buildOverlayMain() {
     .buildElement()
     .addDiv({ id: 'bm-contain-buttons-action' })
     .addDiv()
+    .addButton(
+      {
+        id: 'bm-button-toggle-visibility',
+        className: 'bm-help',
+        innerHTML: '👁',
+        title: 'Hide/Show Blue Marble',
+      },
+      (instance, button) => {
+        button.addEventListener('click', () => {
+          const overlay = document.getElementById('bm-overlay');
+          if (overlay) {
+            if (overlay.style.display === 'none') {
+              overlay.style.display = 'block';
+              button.innerHTML = '👁';
+              button.title = 'Hide Blue Marble';
+              instance.handleDisplayStatus('Blue Marble shown!');
+            } else {
+              overlay.style.display = 'none';
+              button.innerHTML = '🙈';
+              button.title = 'Show Blue Marble';
+              // Não mostra status quando oculto pois o usuário não verá
+            }
+          }
+        });
+      }
+    )
+    .buildElement()
     // .addButton({'id': 'bm-button-teleport', 'className': 'bm-help', 'textContent': '✈'}).buildElement()
     // .addButton({'id': 'bm-button-favorite', 'className': 'bm-help', 'innerHTML': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><polygon points="10,2 12,7.5 18,7.5 13.5,11.5 15.5,18 10,14 4.5,18 6.5,11.5 2,7.5 8,7.5" fill="white"></polygon></svg>'}).buildElement()
     // .addButton({'id': 'bm-button-templates', 'className': 'bm-help', 'innerHTML': '🖌'}).buildElement()
