@@ -6,7 +6,14 @@ import Overlay from './Overlay.js';
 import Observers from './observers.js';
 import ApiManager from './apiManager.js';
 import TemplateManager from './templateManager.js';
-import { consoleLog, consoleWarn } from './utils.js';
+import {
+  consoleLog,
+  consoleWarn,
+  saveLastCoordinates,
+  loadLastCoordinates,
+  saveLastTemplate,
+  loadLastTemplate,
+} from './utils.js';
 
 const name = GM_info.script.name.toString(); // Name of userscript
 const version = GM_info.script.version.toString(); // Version of userscript
@@ -366,6 +373,9 @@ function buildOverlayMain() {
             );
             return;
           }
+          // Salva as coordenadas no cache
+          saveLastCoordinates(coords);
+
           instance.updateInnerHTML('bm-input-tx', coords?.[0] || '');
           instance.updateInnerHTML('bm-input-ty', coords?.[1] || '');
           instance.updateInnerHTML('bm-input-px', coords?.[2] || '');
@@ -374,52 +384,119 @@ function buildOverlayMain() {
       }
     )
     .buildElement()
-    .addInput({
-      type: 'number',
-      id: 'bm-input-tx',
-      placeholder: 'Tl X',
-      min: 0,
-      max: 2047,
-      step: 1,
-      required: true,
-    })
+    .addInput(
+      {
+        type: 'number',
+        id: 'bm-input-tx',
+        placeholder: 'Tl X',
+        min: 0,
+        max: 2047,
+        step: 1,
+        required: true,
+      },
+      (instance, input) => {
+        // Carrega as coordenadas salvas quando o input é criado
+        const savedCoords = loadLastCoordinates();
+        if (savedCoords && savedCoords[0] !== undefined) {
+          input.value = savedCoords[0];
+        }
+      }
+    )
     .buildElement()
-    .addInput({
-      type: 'number',
-      id: 'bm-input-ty',
-      placeholder: 'Tl Y',
-      min: 0,
-      max: 2047,
-      step: 1,
-      required: true,
-    })
+    .addInput(
+      {
+        type: 'number',
+        id: 'bm-input-ty',
+        placeholder: 'Tl Y',
+        min: 0,
+        max: 2047,
+        step: 1,
+        required: true,
+      },
+      (instance, input) => {
+        // Carrega as coordenadas salvas quando o input é criado
+        const savedCoords = loadLastCoordinates();
+        if (savedCoords && savedCoords[1] !== undefined) {
+          input.value = savedCoords[1];
+        }
+      }
+    )
     .buildElement()
-    .addInput({
-      type: 'number',
-      id: 'bm-input-px',
-      placeholder: 'Px X',
-      min: 0,
-      max: 2047,
-      step: 1,
-      required: true,
-    })
+    .addInput(
+      {
+        type: 'number',
+        id: 'bm-input-px',
+        placeholder: 'Px X',
+        min: 0,
+        max: 2047,
+        step: 1,
+        required: true,
+      },
+      (instance, input) => {
+        // Carrega as coordenadas salvas quando o input é criado
+        const savedCoords = loadLastCoordinates();
+        if (savedCoords && savedCoords[2] !== undefined) {
+          input.value = savedCoords[2];
+        }
+      }
+    )
     .buildElement()
-    .addInput({
-      type: 'number',
-      id: 'bm-input-py',
-      placeholder: 'Px Y',
-      min: 0,
-      max: 2047,
-      step: 1,
-      required: true,
-    })
+    .addInput(
+      {
+        type: 'number',
+        id: 'bm-input-py',
+        placeholder: 'Px Y',
+        min: 0,
+        max: 2047,
+        step: 1,
+        required: true,
+      },
+      (instance, input) => {
+        // Carrega as coordenadas salvas quando o input é criado
+        const savedCoords = loadLastCoordinates();
+        if (savedCoords && savedCoords[3] !== undefined) {
+          input.value = savedCoords[3];
+        }
+      }
+    )
     .buildElement()
     .buildElement()
-    .addInputFile({
-      id: 'bm-input-file-template',
-      textContent: 'Upload Template',
-      accept: 'image/png, image/jpeg, image/webp, image/bmp, image/gif',
-    })
+    .addInputFile(
+      {
+        id: 'bm-input-file-template',
+        textContent: 'Upload Template',
+        accept: 'image/png, image/jpeg, image/webp, image/bmp, image/gif',
+      },
+      async (instance, container, input, button) => {
+        // Carrega a última imagem salva quando o input é criado
+        try {
+          const savedTemplate = await loadLastTemplate();
+          if (savedTemplate) {
+            // Cria um novo FileList com o arquivo salvo
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(savedTemplate);
+            input.files = dataTransfer.files;
+
+            // Atualiza o texto do botão
+            button.style.maxWidth = `${button.offsetWidth}px`;
+            button.textContent = savedTemplate.name;
+
+            // Adiciona um indicador visual de que foi carregado do cache
+            const cacheIndicator = document.createElement('span');
+            cacheIndicator.textContent = ' 💾';
+            cacheIndicator.title = 'Carregado do cache';
+            cacheIndicator.style.cssText = 'opacity: 0.7; font-size: 0.8em;';
+            button.appendChild(cacheIndicator);
+
+            instance.handleDisplayStatus(
+              `Template "${savedTemplate.name}" carregado do cache!`
+            );
+          }
+        } catch (error) {
+          consoleWarn('Erro ao carregar template do cache:', error);
+        }
+      }
+    )
     .buildElement()
     .addDiv({ id: 'bm-contain-buttons-template' })
     .addButton(
@@ -467,15 +544,24 @@ function buildOverlayMain() {
             return;
           }
 
+          const coords = [
+            Number(coordTlX.value),
+            Number(coordTlY.value),
+            Number(coordPxX.value),
+            Number(coordPxY.value),
+          ];
+
+          // Salva as coordenadas e o template no cache quando o template é habilitado
+          saveLastCoordinates(coords);
+          saveLastTemplate(
+            input.files[0],
+            input.files[0]?.name.replace(/\.[^/.]+$/, '')
+          );
+
           templateManager.createTemplate(
             input.files[0],
             input.files[0]?.name.replace(/\.[^/.]+$/, ''),
-            [
-              Number(coordTlX.value),
-              Number(coordTlY.value),
-              Number(coordPxX.value),
-              Number(coordPxY.value),
-            ]
+            coords
           );
 
           // console.log(`TCoords: ${apiManager.templateCoordsTilePixel}\nCoords: ${apiManager.coordsTilePixel}`);
