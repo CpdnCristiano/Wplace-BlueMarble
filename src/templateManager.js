@@ -1,5 +1,6 @@
 import Template from './Template';
 import { numberToEncoded } from './utils';
+import wplaceColors from './wplace_colors.json';
 
 /** Manages the template system.
  * This class handles all external requests for modification to a Template.
@@ -64,6 +65,179 @@ export default class TemplateManager {
     this.hiddenColors = new Set(); // Track hidden colors
     this.tilePixelCache = new Map(); // Cache for pixel counts per tile
     this.tileColorCache = new Map(); // Cache for color counts per tile
+
+    // Wplace color palette system
+    this.wplaceColors = wplaceColors.colors || wplaceColors; // Support both formats
+    this.colorCache = new Map(); // Cache for color matching results to improve performance
+    console.log(
+      `Loaded ${this.wplaceColors.length} Wplace colors for matching`
+    );
+  }
+
+  /** Busca a cor Wplace mais próxima para uma determinada cor RGB
+   * Utiliza a distância Euclidiana no espaço RGB para encontrar a cor mais semelhante
+   * @param {number} r - Componente vermelho (0-255)
+   * @param {number} g - Componente verde (0-255)
+   * @param {number} b - Componente azul (0-255)
+   * @returns {Object} O objeto da cor Wplace mais próxima com name, rgb, rgbValues e hex
+   * @since 0.71.0
+   */
+  findClosestWplaceColor(r, g, b) {
+    const colorKey = `rgb(${r},${g},${b})`;
+
+    // Verifica o cache primeiro para evitar recálculos
+    if (this.colorCache.has(colorKey)) {
+      return this.colorCache.get(colorKey);
+    }
+
+    let closestColor = this.wplaceColors[0];
+    let minDistance = Infinity;
+
+    // Percorre todas as cores Wplace disponíveis
+    for (const color of this.wplaceColors) {
+      // Calcula a distância Euclidiana no espaço RGB
+      const dr = r - color.rgbValues[0];
+      const dg = g - color.rgbValues[1];
+      const db = b - color.rgbValues[2];
+      const distance = Math.sqrt(dr * dr + dg * dg + db * db);
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestColor = color;
+      }
+
+      // Se encontrou uma cor exata, não precisa continuar
+      if (distance === 0) {
+        break;
+      }
+    }
+
+    // Armazena o resultado no cache
+    this.colorCache.set(colorKey, closestColor);
+    return closestColor;
+  }
+
+  /** Converte qualquer cor RGB para sua equivalente Wplace mais próxima
+   * @param {string} rgbString - String RGB como "rgb(255,128,64)"
+   * @returns {Object} Objeto com a cor original, correspondência mais próxima e informações da cor
+   * @since 0.71.0
+   */
+  convertToWplaceColor(rgbString) {
+    // Extrai valores RGB da string
+    const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    if (!match) {
+      console.warn(`Formato de cor inválido: ${rgbString}`);
+      return null;
+    }
+
+    const r = parseInt(match[1]);
+    const g = parseInt(match[2]);
+    const b = parseInt(match[3]);
+
+    const closestColor = this.findClosestWplaceColor(r, g, b);
+
+    return {
+      original: rgbString,
+      wplaceColor: closestColor.rgb,
+      wplaceName: closestColor.name,
+      wplaceHex: closestColor.hex,
+      distance: this.calculateColorDistance(r, g, b, closestColor.rgbValues),
+      isExactMatch:
+        this.calculateColorDistance(r, g, b, closestColor.rgbValues) < 1,
+    };
+  }
+
+  /** Calcula a distância Euclidiana entre duas cores RGB
+   * @param {number} r1 - Componente vermelho da primeira cor
+   * @param {number} g1 - Componente verde da primeira cor
+   * @param {number} b1 - Componente azul da primeira cor
+   * @param {Array} rgb2 - Array com [r, g, b] da segunda cor
+   * @returns {number} Distância Euclidiana entre as cores
+   * @since 0.71.0
+   */
+  calculateColorDistance(r1, g1, b1, rgb2) {
+    const dr = r1 - rgb2[0];
+    const dg = g1 - rgb2[1];
+    const db = b1 - rgb2[2];
+    return Math.sqrt(dr * dr + dg * dg + db * db);
+  }
+
+  /** Busca a cor Wplace mais próxima utilizando valores RGB separados
+   * Versão alternativa mais direta da função principal
+   * @param {number} red - Valor do vermelho (0-255)
+   * @param {number} green - Valor do verde (0-255)
+   * @param {number} blue - Valor do azul (0-255)
+   * @returns {Object} A cor Wplace mais próxima
+   * @since 0.71.0
+   */
+  getClosestWplaceColor(red, green, blue) {
+    return this.findClosestWplaceColor(red, green, blue);
+  }
+
+  /** Busca a cor Wplace mais próxima a partir de um valor hexadecimal
+   * @param {string} hexColor - Cor em formato hexadecimal (#RRGGBB ou #RGB)
+   * @returns {Object} A cor Wplace mais próxima
+   * @since 0.71.0
+   */
+  findClosestWplaceColorFromHex(hexColor) {
+    // Remove o # se presente
+    hexColor = hexColor.replace('#', '');
+
+    // Converte hex curto (#RGB) para hex longo (#RRGGBB)
+    if (hexColor.length === 3) {
+      hexColor = hexColor
+        .split('')
+        .map((char) => char + char)
+        .join('');
+    }
+
+    if (hexColor.length !== 6) {
+      console.warn(`Formato hex inválido: ${hexColor}`);
+      return null;
+    }
+
+    const r = parseInt(hexColor.slice(0, 2), 16);
+    const g = parseInt(hexColor.slice(2, 4), 16);
+    const b = parseInt(hexColor.slice(4, 6), 16);
+
+    return this.findClosestWplaceColor(r, g, b);
+  }
+
+  /** Obtém informações detalhadas sobre a correspondência de cores
+   * @param {number} r - Componente vermelho
+   * @param {number} g - Componente verde
+   * @param {number} b - Componente azul
+   * @returns {Object} Informações detalhadas sobre a correspondência
+   * @since 0.71.0
+   */
+  getColorMatchInfo(r, g, b) {
+    const closestColor = this.findClosestWplaceColor(r, g, b);
+    const distance = this.calculateColorDistance(
+      r,
+      g,
+      b,
+      closestColor.rgbValues
+    );
+
+    return {
+      inputColor: { r, g, b },
+      inputRgb: `rgb(${r}, ${g}, ${b})`,
+      inputHex: `#${r.toString(16).padStart(2, '0')}${g
+        .toString(16)
+        .padStart(2, '0')}${b.toString(16).padStart(2, '0')}`,
+      closestColor: closestColor,
+      distance: distance,
+      isExactMatch: distance < 1,
+      isCloseMatch: distance < 10, // Considera "próximo" se distância < 10
+      matchQuality:
+        distance < 1
+          ? 'Exata'
+          : distance < 10
+          ? 'Muito próxima'
+          : distance < 30
+          ? 'Próxima'
+          : 'Distante',
+    };
   }
 
   /** Retrieves the pixel art canvas.
@@ -313,18 +487,13 @@ export default class TemplateManager {
     return await canvas.convertToBlob({ type: 'image/png' });
   }
 
-  /** Filters out hidden colors from a template bitmap
+  /** Filters out hidden colors from a template bitmap and converts colors to Wplace palette
    * @param {ImageBitmap} templateBitmap - The template bitmap to filter
    * @param {number} drawSize - The size of the drawing area
-   * @returns {ImageBitmap} The filtered template bitmap
-   * @since 0.67.1
+   * @returns {ImageBitmap} The filtered template bitmap with Wplace colors applied
+   * @since 0.71.0
    */
   async filterHiddenColorsFromTemplate(templateBitmap, drawSize) {
-    // If no colors are hidden, return original template
-    if (this.hiddenColors.size === 0) {
-      return templateBitmap;
-    }
-
     // Create temporary canvas to filter the template
     const filterCanvas = new OffscreenCanvas(drawSize, drawSize);
     const filterContext = filterCanvas.getContext('2d');
@@ -336,7 +505,7 @@ export default class TemplateManager {
     const imageData = filterContext.getImageData(0, 0, drawSize, drawSize);
     const data = imageData.data;
 
-    // Process each pixel and hide colors that are in the hidden set
+    // Process each pixel: hide colors and convert to Wplace colors
     for (let i = 0; i < data.length; i += 4) {
       const alpha = data[i + 3];
 
@@ -351,6 +520,16 @@ export default class TemplateManager {
       // If this color is hidden, make the pixel transparent
       if (this.hiddenColors.has(colorKey)) {
         data[i + 3] = 0; // Set alpha to 0 (transparent)
+        continue;
+      }
+
+      // Convert original color to closest Wplace color
+      const wplaceColor = this.findClosestWplaceColor(r, g, b);
+      if (wplaceColor) {
+        data[i] = wplaceColor.rgbValues[0]; // Red
+        data[i + 1] = wplaceColor.rgbValues[1]; // Green
+        data[i + 2] = wplaceColor.rgbValues[2]; // Blue
+        // Keep original alpha
       }
     }
 

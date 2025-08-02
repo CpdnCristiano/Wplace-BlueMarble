@@ -1,0 +1,700 @@
+{
+    "totalColors": 63,
+    "extractedAt": "2025-08-02T20:07:20.999Z",
+    "source": "wplace.live color palette",
+    "colors": [
+        {
+            "name": "Black",
+            "rgb": "rgb(0, 0, 0)",
+            "rgbValues": [
+                0,
+                0,
+                0
+            ],
+            "hex": "#000000",
+            "blocked": false
+        },
+        {
+            "name": "Dark Gray",
+            "rgb": "rgb(60, 60, 60)",
+            "rgbValues": [
+                60,
+                60,
+                60
+            ],
+            "hex": "#3C3C3C",
+            "blocked": false
+        },
+        {
+            "name": "Gray",
+            "rgb": "rgb(120, 120, 120)",
+            "rgbValues": [
+                120,
+                120,
+                120
+            ],
+            "hex": "#787878",
+            "blocked": false
+        },
+        {
+            "name": "Medium Gray",
+            "rgb": "rgb(170, 170, 170)",
+            "rgbValues": [
+                170,
+                170,
+                170
+            ],
+            "hex": "#AAAAAA",
+            "blocked": false
+        },
+        {
+            "name": "Light Gray",
+            "rgb": "rgb(210, 210, 210)",
+            "rgbValues": [
+                210,
+                210,
+                210
+            ],
+            "hex": "#D2D2D2",
+            "blocked": false
+        },
+        {
+            "name": "White",
+            "rgb": "rgb(255, 255, 255)",
+            "rgbValues": [
+                255,
+                255,
+                255
+            ],
+            "hex": "#FFFFFF",
+            "blocked": false
+        },
+        {
+            "name": "Deep Red",
+            "rgb": "rgb(96, 0, 24)",
+            "rgbValues": [
+                96,
+                0,
+                24
+            ],
+            "hex": "#600018",
+            "blocked": false
+        },
+        {
+            "name": "Dark Red",
+            "rgb": "rgb(165, 14, 30)",
+            "rgbValues": [
+                165,
+                14,
+                30
+            ],
+            "hex": "#A50E1E",
+            "blocked": true
+        },
+        {
+            "name": "Red",
+            "rgb": "rgb(237, 28, 36)",
+            "rgbValues": [
+                237,
+                28,
+                36
+            ],
+            "hex": "#ED1C24",
+            "blocked": false
+        },
+        {
+            "name": "Light Red",
+            "rgb": "rgb(250, 128, 114)",
+            "rgbValues": [
+                250,
+                128,
+                114
+            ],
+            "hex": "#FA8072",
+            "blocked": true
+        },
+        {
+            "name": "Dark Orange",
+            "rgb": "rgb(228, 92, 26)",
+            "rgbValues": [
+                228,
+                92,
+                26
+            ],
+            "hex": "#E45C1A",
+            "blocked": false
+        },
+        {
+            "name": "Orange",
+            "rgb": "rgb(255, 127, 39)",
+            "rgbValues": [
+                255,
+                127,
+                39
+            ],
+            "hex": "#FF7F27",
+            "blocked": false
+        },
+        {
+            "name": "Gold",
+            "rgb": "rgb(246, 170, 9)",
+            "rgbValues": [
+                246,
+                170,
+                9
+            ],
+            "hex": "#F6AA09",
+            "blocked": false
+        },
+        {
+            "name": "Yellow",
+            "rgb": "rgb(249, 221, 59)",
+            "rgbValues": [
+                249,
+                221,
+                59
+            ],
+            "hex": "#F9DD3B",
+            "blocked": false
+        },
+        {
+            "name": "Light Yellow",
+            "rgb": "rgb(255, 250, 188)",
+            "rgbValues": [
+                255,
+                250,
+                188
+            ],
+            "hex": "#FFFABC",
+            "blocked": false
+        },
+        {
+            "name": "Dark Goldenrod",
+            "rgb": "rgb(156, 132, 49)",
+            "rgbValues": [
+                156,
+                132,
+                49
+            ],
+            "hex": "#9C8431",
+            "blocked": true
+        },
+        {
+            "name": "Goldenrod",
+            "rgb": "rgb(197, 173, 49)",
+            "rgbValues": [
+                197,
+                173,
+                49
+            ],
+            "hex": "#C5AD31",
+            "blocked": true
+        },
+        {
+            "name": "Light Goldenrod",
+            "rgb": "rgb(232, 212, 95)",
+            "rgbValues": [
+                232,
+                212,
+                95
+            ],
+            "hex": "#E8D45F",
+            "blocked": true
+        },
+        {
+            "name": "Dark Olive",
+            "rgb": "rgb(74, 107, 58)",
+            "rgbValues": [
+                74,
+                107,
+                58
+            ],
+            "hex": "#4A6B3A",
+            "blocked": true
+        },
+        {
+            "name": "Olive",
+            "rgb": "rgb(90, 148, 74)",
+            "rgbValues": [
+                90,
+                148,
+                74
+            ],
+            "hex": "#5A944A",
+            "blocked": true
+        },
+        {
+            "name": "Light Olive",
+            "rgb": "rgb(132, 197, 115)",
+            "rgbValues": [
+                132,
+                197,
+                115
+            ],
+            "hex": "#84C573",
+            "blocked": true
+        },
+        {
+            "name": "Dark Green",
+            "rgb": "rgb(14, 185, 104)",
+            "rgbValues": [
+                14,
+                185,
+                104
+            ],
+            "hex": "#0EB968",
+            "blocked": false
+        },
+        {
+            "name": "Green",
+            "rgb": "rgb(19, 230, 123)",
+            "rgbValues": [
+                19,
+                230,
+                123
+            ],
+            "hex": "#13E67B",
+            "blocked": false
+        },
+        {
+            "name": "Light Green",
+            "rgb": "rgb(135, 255, 94)",
+            "rgbValues": [
+                135,
+                255,
+                94
+            ],
+            "hex": "#87FF5E",
+            "blocked": false
+        },
+        {
+            "name": "Dark Teal",
+            "rgb": "rgb(12, 129, 110)",
+            "rgbValues": [
+                12,
+                129,
+                110
+            ],
+            "hex": "#0C816E",
+            "blocked": false
+        },
+        {
+            "name": "Teal",
+            "rgb": "rgb(16, 174, 166)",
+            "rgbValues": [
+                16,
+                174,
+                166
+            ],
+            "hex": "#10AEA6",
+            "blocked": false
+        },
+        {
+            "name": "Light Teal",
+            "rgb": "rgb(19, 225, 190)",
+            "rgbValues": [
+                19,
+                225,
+                190
+            ],
+            "hex": "#13E1BE",
+            "blocked": false
+        },
+        {
+            "name": "Dark Cyan",
+            "rgb": "rgb(15, 121, 159)",
+            "rgbValues": [
+                15,
+                121,
+                159
+            ],
+            "hex": "#0F799F",
+            "blocked": true
+        },
+        {
+            "name": "Cyan",
+            "rgb": "rgb(96, 247, 242)",
+            "rgbValues": [
+                96,
+                247,
+                242
+            ],
+            "hex": "#60F7F2",
+            "blocked": false
+        },
+        {
+            "name": "Light Cyan",
+            "rgb": "rgb(187, 250, 242)",
+            "rgbValues": [
+                187,
+                250,
+                242
+            ],
+            "hex": "#BBFAF2",
+            "blocked": true
+        },
+        {
+            "name": "Dark Blue",
+            "rgb": "rgb(40, 80, 158)",
+            "rgbValues": [
+                40,
+                80,
+                158
+            ],
+            "hex": "#28509E",
+            "blocked": false
+        },
+        {
+            "name": "Blue",
+            "rgb": "rgb(64, 147, 228)",
+            "rgbValues": [
+                64,
+                147,
+                228
+            ],
+            "hex": "#4093E4",
+            "blocked": false
+        },
+        {
+            "name": "Light Blue",
+            "rgb": "rgb(125, 199, 255)",
+            "rgbValues": [
+                125,
+                199,
+                255
+            ],
+            "hex": "#7DC7FF",
+            "blocked": true
+        },
+        {
+            "name": "Dark Indigo",
+            "rgb": "rgb(77, 49, 184)",
+            "rgbValues": [
+                77,
+                49,
+                184
+            ],
+            "hex": "#4D31B8",
+            "blocked": false
+        },
+        {
+            "name": "Indigo",
+            "rgb": "rgb(107, 80, 246)",
+            "rgbValues": [
+                107,
+                80,
+                246
+            ],
+            "hex": "#6B50F6",
+            "blocked": false
+        },
+        {
+            "name": "Light Indigo",
+            "rgb": "rgb(153, 177, 251)",
+            "rgbValues": [
+                153,
+                177,
+                251
+            ],
+            "hex": "#99B1FB",
+            "blocked": false
+        },
+        {
+            "name": "Dark Slate Blue",
+            "rgb": "rgb(74, 66, 132)",
+            "rgbValues": [
+                74,
+                66,
+                132
+            ],
+            "hex": "#4A4284",
+            "blocked": true
+        },
+        {
+            "name": "Slate Blue",
+            "rgb": "rgb(122, 113, 196)",
+            "rgbValues": [
+                122,
+                113,
+                196
+            ],
+            "hex": "#7A71C4",
+            "blocked": true
+        },
+        {
+            "name": "Light Slate Blue",
+            "rgb": "rgb(181, 174, 241)",
+            "rgbValues": [
+                181,
+                174,
+                241
+            ],
+            "hex": "#B5AEF1",
+            "blocked": true
+        },
+        {
+            "name": "Dark Purple",
+            "rgb": "rgb(120, 12, 153)",
+            "rgbValues": [
+                120,
+                12,
+                153
+            ],
+            "hex": "#780C99",
+            "blocked": false
+        },
+        {
+            "name": "Purple",
+            "rgb": "rgb(170, 56, 185)",
+            "rgbValues": [
+                170,
+                56,
+                185
+            ],
+            "hex": "#AA38B9",
+            "blocked": false
+        },
+        {
+            "name": "Light Purple",
+            "rgb": "rgb(224, 159, 249)",
+            "rgbValues": [
+                224,
+                159,
+                249
+            ],
+            "hex": "#E09FF9",
+            "blocked": false
+        },
+        {
+            "name": "Dark Pink",
+            "rgb": "rgb(203, 0, 122)",
+            "rgbValues": [
+                203,
+                0,
+                122
+            ],
+            "hex": "#CB007A",
+            "blocked": false
+        },
+        {
+            "name": "Pink",
+            "rgb": "rgb(236, 31, 128)",
+            "rgbValues": [
+                236,
+                31,
+                128
+            ],
+            "hex": "#EC1F80",
+            "blocked": false
+        },
+        {
+            "name": "Light Pink",
+            "rgb": "rgb(243, 141, 169)",
+            "rgbValues": [
+                243,
+                141,
+                169
+            ],
+            "hex": "#F38DA9",
+            "blocked": false
+        },
+        {
+            "name": "Dark Peach",
+            "rgb": "rgb(155, 82, 73)",
+            "rgbValues": [
+                155,
+                82,
+                73
+            ],
+            "hex": "#9B5249",
+            "blocked": true
+        },
+        {
+            "name": "Peach",
+            "rgb": "rgb(209, 128, 120)",
+            "rgbValues": [
+                209,
+                128,
+                120
+            ],
+            "hex": "#D18078",
+            "blocked": true
+        },
+        {
+            "name": "Light Peach",
+            "rgb": "rgb(250, 182, 164)",
+            "rgbValues": [
+                250,
+                182,
+                164
+            ],
+            "hex": "#FAB6A4",
+            "blocked": false
+        },
+        {
+            "name": "Dark Brown",
+            "rgb": "rgb(104, 70, 52)",
+            "rgbValues": [
+                104,
+                70,
+                52
+            ],
+            "hex": "#684634",
+            "blocked": false
+        },
+        {
+            "name": "Brown",
+            "rgb": "rgb(149, 104, 42)",
+            "rgbValues": [
+                149,
+                104,
+                42
+            ],
+            "hex": "#95682A",
+            "blocked": false
+        },
+        {
+            "name": "Light Brown",
+            "rgb": "rgb(219, 164, 99)",
+            "rgbValues": [
+                219,
+                164,
+                99
+            ],
+            "hex": "#DBA463",
+            "blocked": true
+        },
+        {
+            "name": "Dark Tan",
+            "rgb": "rgb(123, 99, 82)",
+            "rgbValues": [
+                123,
+                99,
+                82
+            ],
+            "hex": "#7B6352",
+            "blocked": true
+        },
+        {
+            "name": "Tan",
+            "rgb": "rgb(156, 132, 107)",
+            "rgbValues": [
+                156,
+                132,
+                107
+            ],
+            "hex": "#9C846B",
+            "blocked": true
+        },
+        {
+            "name": "Light Tan",
+            "rgb": "rgb(214, 181, 148)",
+            "rgbValues": [
+                214,
+                181,
+                148
+            ],
+            "hex": "#D6B594",
+            "blocked": true
+        },
+        {
+            "name": "Dark Beige",
+            "rgb": "rgb(209, 128, 81)",
+            "rgbValues": [
+                209,
+                128,
+                81
+            ],
+            "hex": "#D18051",
+            "blocked": true
+        },
+        {
+            "name": "Beige",
+            "rgb": "rgb(248, 178, 119)",
+            "rgbValues": [
+                248,
+                178,
+                119
+            ],
+            "hex": "#F8B277",
+            "blocked": false
+        },
+        {
+            "name": "Light Beige",
+            "rgb": "rgb(255, 197, 165)",
+            "rgbValues": [
+                255,
+                197,
+                165
+            ],
+            "hex": "#FFC5A5",
+            "blocked": false
+        },
+        {
+            "name": "Dark Stone",
+            "rgb": "rgb(109, 100, 63)",
+            "rgbValues": [
+                109,
+                100,
+                63
+            ],
+            "hex": "#6D643F",
+            "blocked": true
+        },
+        {
+            "name": "Stone",
+            "rgb": "rgb(148, 140, 107)",
+            "rgbValues": [
+                148,
+                140,
+                107
+            ],
+            "hex": "#948C6B",
+            "blocked": true
+        },
+        {
+            "name": "Light Stone",
+            "rgb": "rgb(205, 197, 158)",
+            "rgbValues": [
+                205,
+                197,
+                158
+            ],
+            "hex": "#CDC59E",
+            "blocked": true
+        },
+        {
+            "name": "Dark Slate",
+            "rgb": "rgb(51, 57, 65)",
+            "rgbValues": [
+                51,
+                57,
+                65
+            ],
+            "hex": "#333941",
+            "blocked": true
+        },
+        {
+            "name": "Slate",
+            "rgb": "rgb(109, 117, 141)",
+            "rgbValues": [
+                109,
+                117,
+                141
+            ],
+            "hex": "#6D758D",
+            "blocked": true
+        },
+        {
+            "name": "Light Slate",
+            "rgb": "rgb(179, 185, 209)",
+            "rgbValues": [
+                179,
+                185,
+                209
+            ],
+            "hex": "#B3B9D1",
+            "blocked": true
+        }
+    ]
+}
