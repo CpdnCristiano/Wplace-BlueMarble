@@ -278,7 +278,10 @@ function createRestoreButton() {
       restoreButton.remove();
       // Usar a instância do overlay para mostrar status se disponível
       const overlayInstance = window.overlayInstance;
-      if (overlayInstance && typeof overlayInstance.handleDisplayStatus === 'function') {
+      if (
+        overlayInstance &&
+        typeof overlayInstance.handleDisplayStatus === 'function'
+      ) {
         overlayInstance.handleDisplayStatus('Blue Marble shown!');
       }
     }
@@ -641,13 +644,13 @@ function buildOverlayMain() {
         button.onclick = () => {
           // Remove template overlay
           templateManager.disableTemplate();
-          
+
           // Clear stats display
           const statsContainer = document.getElementById('bm-contain-stats');
           if (statsContainer) {
             statsContainer.style.display = 'none';
           }
-          
+
           instance.handleDisplayStatus('Template disabled!');
         };
       }
@@ -746,7 +749,8 @@ function buildOverlayMain() {
               button.title = 'Hide Blue Marble';
               instance.handleDisplayStatus('Blue Marble shown!');
               // Remove o botão de restore se existir
-              const restoreButton = document.getElementById('bm-restore-button');
+              const restoreButton =
+                document.getElementById('bm-restore-button');
               if (restoreButton) {
                 restoreButton.remove();
               }
