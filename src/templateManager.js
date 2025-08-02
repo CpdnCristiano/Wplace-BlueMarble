@@ -200,23 +200,23 @@ export default class TemplateManager {
     if (templateCanvas) {
       templateCanvas.remove();
     }
-    
+
     // Clear canvas reference
     this.canvasTemplate = null;
-    
+
     // Clear templates data
     this.templatesArray = [];
     this.templatesJSON = null;
     this.currentStats = null;
-    
+
     // Clear caches
     this.tilePixelCache.clear();
     this.tileColorCache.clear();
     this.processedTiles.clear();
-    
+
     // Clear hidden colors
     this.hiddenColors.clear();
-    
+
     console.log('Template disabled and all data cleared');
   }
 

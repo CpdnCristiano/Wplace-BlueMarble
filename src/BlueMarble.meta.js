@@ -6,7 +6,7 @@
 // @author       CpdnCristiano
 // @license      MPL-2.0
 // @supportURL   https://discord.gg/tpeBPy46hf
-// @homepageURL  https://github.com/CpdnCristiano/Wplace-BlueMarble
+// @homepageURL  https://github.com/CpdnCristiano/Wplace-BlueMarble/tree/better-wplace
 // @icon         https://raw.githubusercontent.com/CpdnCristiano/Wplace-BlueMarble/better-wplace/dist/assets/Favicon.png
 // @updateURL    https://raw.githubusercontent.com/CpdnCristiano/Wplace-BlueMarble/better-wplace/dist/BlueMarble.user.js
 // @downloadURL  https://raw.githubusercontent.com/CpdnCristiano/Wplace-BlueMarble/better-wplace/dist/BlueMarble.user.js
