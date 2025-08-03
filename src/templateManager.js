@@ -143,7 +143,11 @@ export default class TemplateManager {
       wplaceHex: closestColor.hex,
       distance: this.calculateColorDistance(r, g, b, closestColor.rgbValues),
       isExactMatch:
-        this.calculateColorDistance(r, g, b, closestColor.rgbValues) < 1,
+        // For black colors, require perfect match (distance = 0)
+        // For other colors, allow small tolerance (distance < 1)
+        r === 0 && g === 0 && b === 0
+          ? this.calculateColorDistance(r, g, b, closestColor.rgbValues) === 0
+          : this.calculateColorDistance(r, g, b, closestColor.rgbValues) < 1,
     };
   }
 
@@ -227,7 +231,10 @@ export default class TemplateManager {
         .padStart(2, '0')}${b.toString(16).padStart(2, '0')}`,
       closestColor: closestColor,
       distance: distance,
-      isExactMatch: distance < 1,
+      isExactMatch:
+        // For black colors, require perfect match (distance = 0)
+        // For other colors, allow small tolerance (distance < 1)
+        r === 0 && g === 0 && b === 0 ? distance === 0 : distance < 1,
       isCloseMatch: distance < 10, // Considera "próximo" se distância < 10
       matchQuality:
         distance < 1
@@ -762,16 +769,33 @@ export default class TemplateManager {
       const tileR = tileData.data[i];
       const tileG = tileData.data[i + 1];
       const tileB = tileData.data[i + 2];
+      const tileAlpha = tileData.data[i + 3];
+
+      // Skip transparent pixels in tile - they can't be considered "painted"
+      // This fixes the issue where transparent pixels with RGB(0,0,0) were being
+      // counted as painted black pixels
+      if (tileAlpha === 0) continue;
 
       // Check if pixel colors match (with small tolerance for compression artifacts)
-      // Special handling for black pixels - require exact match or very close
+      // Special handling for black pixels - require exact match
       const isBlackTemplate =
         templateR === 0 && templateG === 0 && templateB === 0;
-      const tolerance = isBlackTemplate ? 1 : 5; // Stricter tolerance for black pixels
+      const tolerance = isBlackTemplate ? 0 : 5; // No tolerance for black pixels, strict exact match required
 
       const rDiff = Math.abs(templateR - tileR);
       const gDiff = Math.abs(templateG - tileG);
       const bDiff = Math.abs(templateB - tileB);
+
+      // Debug log for black pixels
+      if (isBlackTemplate && (rDiff > 0 || gDiff > 0 || bDiff > 0)) {
+        console.log(
+          `Black pixel NOT matched: Template(0,0,0) vs Tile(${tileR},${tileG},${tileB}) Alpha=${tileAlpha} - Diff(${rDiff},${gDiff},${bDiff})`
+        );
+      } else if (isBlackTemplate && rDiff === 0 && gDiff === 0 && bDiff === 0) {
+        console.log(
+          `Black pixel MATCHED: Perfect match (0,0,0) Alpha=${tileAlpha}`
+        );
+      }
 
       // If colors match, count as painted
       if (rDiff <= tolerance && gDiff <= tolerance && bDiff <= tolerance) {
@@ -1255,6 +1279,32 @@ export default class TemplateManager {
       console.log('Forced recalculation - all tiles will be reprocessed');
       this.overlay.handleDisplayStatus('Recalculating template progress...');
     }
+  }
+
+  /** Forces recalculation specifically for black pixels issue
+   * @since 0.67.2
+   */
+  fixBlackPixelCounting() {
+    console.log(
+      'Fixing black pixel counting - clearing all caches and forcing strict recalculation'
+    );
+    this.forceRecalculation();
+    this.overlay.handleDisplayStatus(
+      'Fixed black pixel counting - recalculating...'
+    );
+  }
+
+  /** Forces recalculation specifically for transparent pixels issue
+   * @since 0.72.6
+   */
+  fixTransparentPixelCounting() {
+    console.log(
+      'Fixing transparent pixel counting - clearing all caches and forcing recalculation with alpha verification'
+    );
+    this.forceRecalculation();
+    this.overlay.handleDisplayStatus(
+      'Fixed transparent pixel counting - recalculating...'
+    );
   }
 
   /** Imports the JSON object, and appends it to any JSON object already loaded
