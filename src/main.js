@@ -657,7 +657,7 @@ function buildOverlayMain() {
     )
     .buildElement()
     .addButton(
-      { id: 'bm-button-download', textContent: '📥 Baixar Template' },
+      { id: 'bm-button-download', textContent: '📥' },
       (instance, button) => {
         button.onclick = () => {
           templateManager.downloadTemplate();
@@ -798,7 +798,7 @@ function buildOverlayMain() {
     .buildElement()
     .buildElement()
     .addSmall({
-      textContent: 'Made by CpdnCristiano',
+      textContent: 'Made by SwingTheVine edited by CpdnCristiano',
       style: 'margin-top: auto;',
     })
     .buildElement()
