@@ -656,6 +656,15 @@ function buildOverlayMain() {
       }
     )
     .buildElement()
+    .addButton(
+      { id: 'bm-button-download', textContent: '📥 Baixar Template' },
+      (instance, button) => {
+        button.onclick = () => {
+          templateManager.downloadTemplate();
+        };
+      }
+    )
+    .buildElement()
     .buildElement()
     .addDiv({ id: 'bm-contain-stats', style: 'display: none;' })
     .addHeader(3, { textContent: 'Template Statistics' })

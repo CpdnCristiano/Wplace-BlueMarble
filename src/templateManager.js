@@ -394,6 +394,146 @@ export default class TemplateManager {
     console.log('Template disabled and all data cleared');
   }
 
+  /** Downloads the template with Wplace colors applied (pixel-perfect conversion)
+   * @since 0.72.1
+   */
+  async downloadTemplate() {
+    if (!this.templatesArray || this.templatesArray.length === 0) {
+      this.overlay.handleDisplayError('Nenhum template carregado para baixar!');
+      return;
+    }
+
+    try {
+      const template = this.templatesArray[0];
+
+      if (!template || !template.file) {
+        this.overlay.handleDisplayError('Template não possui arquivo válido!');
+        return;
+      }
+
+      this.overlay.handleDisplayStatus(
+        'Processando template com cores Wplace...'
+      );
+
+      // Create bitmap from original template
+      const bitmap = await createImageBitmap(template.file);
+
+      // Create canvas for processing with pixel-perfect settings
+      const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+      const context = canvas.getContext('2d');
+
+      // DISABLE image smoothing to maintain pixelated appearance
+      context.imageSmoothingEnabled = false;
+      context.imageSmoothingQuality = 'low';
+
+      // Draw original image without smoothing
+      context.drawImage(bitmap, 0, 0);
+
+      // Get image data for pixel processing
+      const imageData = context.getImageData(0, 0, bitmap.width, bitmap.height);
+      const data = imageData.data;
+
+      // Process each pixel to convert to Wplace colors (pixel-by-pixel)
+      for (let i = 0; i < data.length; i += 4) {
+        const alpha = data[i + 3];
+
+        // Skip transparent pixels
+        if (alpha === 0) continue;
+
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const colorKey = `rgb(${r},${g},${b})`;
+
+        // Skip hidden colors (make them transparent)
+        if (this.hiddenColors.has(colorKey)) {
+          data[i + 3] = 0; // Make transparent
+          continue;
+        }
+
+        // Convert to closest Wplace color (core pixel processing)
+        const wplaceColor = this.findClosestWplaceColor(r, g, b);
+        if (wplaceColor) {
+          data[i] = wplaceColor.rgbValues[0]; // Red
+          data[i + 1] = wplaceColor.rgbValues[1]; // Green
+          data[i + 2] = wplaceColor.rgbValues[2]; // Blue
+          // Keep original alpha
+        }
+      }
+
+      // Put processed data back with pixel-perfect rendering
+      context.putImageData(imageData, 0, 0);
+
+      // Create a larger pixelated version for better visibility
+      const pixelScale = 3; // Scale up by 3x to maintain pixel appearance
+      const pixelCanvas = new OffscreenCanvas(
+        bitmap.width * pixelScale,
+        bitmap.height * pixelScale
+      );
+      const pixelContext = pixelCanvas.getContext('2d');
+
+      // CRITICAL: Disable smoothing for pixelated appearance
+      pixelContext.imageSmoothingEnabled = false;
+      pixelContext.imageSmoothingQuality = 'low';
+
+      // Draw the processed image scaled up with sharp pixels
+      pixelContext.drawImage(
+        canvas,
+        0,
+        0,
+        bitmap.width,
+        bitmap.height,
+        0,
+        0,
+        bitmap.width * pixelScale,
+        bitmap.height * pixelScale
+      );
+
+      // Convert to blob with PNG for lossless quality
+      const processedBlob = await pixelCanvas.convertToBlob({
+        type: 'image/png',
+        quality: 1.0, // Maximum quality for PNG
+      });
+
+      // Create download
+      const url = URL.createObjectURL(processedBlob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = url;
+
+      const fileName = template.displayName
+        ? `${template.displayName}_wplace_pixelated_3x.png`
+        : 'blue_marble_wplace_pixelated_3x.png';
+
+      downloadLink.download = fileName;
+      downloadLink.style.display = 'none';
+
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+
+      URL.revokeObjectURL(url);
+
+      this.overlay.handleDisplayStatus(
+        `Template com cores Wplace baixado: ${fileName}`
+      );
+      console.log(`Wplace colors template downloaded as: ${fileName}`);
+    } catch (error) {
+      console.error('Erro ao baixar template com cores Wplace:', error);
+      this.overlay.handleDisplayError(
+        'Erro ao processar template: ' + error.message
+      );
+    }
+  }
+
+  /** Downloads the processed template with Wplace colors applied
+   * @since 0.72.1
+   * @deprecated Use downloadTemplate() instead - it now processes with Wplace colors by default
+   */
+  async downloadProcessedTemplate() {
+    // Redirect to main download function
+    return this.downloadTemplate();
+  }
+
   /** Draws all templates on that tile
    * @param {File} tileBlob - The pixels that are placed on a tile
    * @param {[number, number]} tileCoords - The tile coordinates [x, y]
@@ -624,7 +764,11 @@ export default class TemplateManager {
       const tileB = tileData.data[i + 2];
 
       // Check if pixel colors match (with small tolerance for compression artifacts)
-      const tolerance = 5;
+      // Special handling for black pixels - require exact match or very close
+      const isBlackTemplate =
+        templateR === 0 && templateG === 0 && templateB === 0;
+      const tolerance = isBlackTemplate ? 1 : 5; // Stricter tolerance for black pixels
+
       const rDiff = Math.abs(templateR - tileR);
       const gDiff = Math.abs(templateG - tileG);
       const bDiff = Math.abs(templateB - tileB);
