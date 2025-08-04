@@ -247,6 +247,35 @@ export default class TemplateManager {
     };
   }
 
+  /** Obtém o nome da cor baseado na string RGB ou hexadecimal
+   * @param {string} colorString - Cor em formato rgb(r,g,b) ou hexadecimal #RRGGBB
+   * @returns {string} O nome da cor Wplace mais próxima
+   * @since 0.71.1
+   */
+  getColorName(colorString) {
+    if (!colorString) return 'Unknown';
+
+    // Se for uma string RGB como "rgb(255, 255, 255)"
+    if (colorString.startsWith('rgb(')) {
+      const rgbMatch = colorString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      if (rgbMatch) {
+        const r = parseInt(rgbMatch[1]);
+        const g = parseInt(rgbMatch[2]);
+        const b = parseInt(rgbMatch[3]);
+        const closestColor = this.findClosestWplaceColor(r, g, b);
+        return closestColor ? closestColor.name : 'Unknown';
+      }
+    }
+
+    // Se for uma string hexadecimal como "#FFFFFF"
+    if (colorString.startsWith('#')) {
+      const closestColor = this.findClosestWplaceColorFromHex(colorString);
+      return closestColor ? closestColor.name : 'Unknown';
+    }
+
+    return 'Unknown';
+  }
+
   /** Retrieves the pixel art canvas.
    * If the canvas has been updated/replaced, it retrieves the new one.
    * @param {string} selector - The CSS selector to use to find the canvas.
@@ -1091,8 +1120,12 @@ export default class TemplateManager {
       const percentage =
         count > 0 ? ((paintedForColor / count) * 100).toFixed(1) : 0;
 
+      // Get color name
+      const colorName = this.getColorName(color);
+
       colorInfo.innerHTML = `
-        <div style="font-weight: bold;">${paintedForColor}/${count.toLocaleString()} (${percentage}% painted)</div>
+        <div style="font-weight: bold; font-size: 13px;">${colorName}</div>
+        <div style="font-size: 11px; margin-top: 1px;">${paintedForColor}/${count.toLocaleString()} (${percentage}% painted)</div>
         <div style="font-size: 10px; color: var(--text-secondary); margin-top: 2px;">${count.toLocaleString()} total pixels</div>
       `;
 
