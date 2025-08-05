@@ -306,6 +306,10 @@ const overlay = new Overlay(name, version); // Constructs a new Overlay object
 const templateManager = new TemplateManager(name, version, overlay); // Constructs a new TemplateManager object
 const apiManager = new ApiManager(templateManager); // Constructs a new ApiManager object
 
+// Disponibilizar instâncias globalmente para o sistema de tooltip
+window.bmApiManager = apiManager;
+window.bmTemplateManager = templateManager;
+
 // Disponibilizar overlay globalmente para o botão de restore
 window.overlayInstance = overlay;
 
@@ -805,4 +809,221 @@ function buildOverlayMain() {
     .buildElement()
     .buildElement()
     .buildOverlay(document.body);
+
+  // Sistema de tooltip para mostrar coordenadas e cor do template no hover
+  setupTemplateTooltip(templateManager);
+}
+
+/** Configura o sistema de tooltip que mostra informações do template ao passar o mouse
+ * @param {TemplateManager} templateManager - Instância do gerenciador de templates
+ * @since 0.72.9
+ */
+function setupTemplateTooltip(templateManager) {
+  const tooltip = document.createElement('div');
+  tooltip.id = 'bm-template-tooltip';
+  tooltip.style.cssText = `
+    position: fixed;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: monospace;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  `;
+  document.body.appendChild(tooltip);
+
+  let tooltipTimeout;
+  let isTooltipEnabled = false;
+
+  // Detecta o canvas principal do mapa
+  function getMainCanvas() {
+    return document.querySelector('#map canvas.maplibregl-canvas');
+  }
+
+  // Converte coordenadas do mouse para coordenadas do mundo
+  function mouseToWorldCoords(event, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+    
+    // Tenta usar coordenadas do último clique conhecido
+    const lastCoords = getLastKnownCoordinates();
+    const lastMousePos = window.bmLastMousePosition;
+    
+    if (lastCoords && lastMousePos && (Date.now() - lastMousePos.timestamp < 30000)) {
+      // Usa dados do último clique para calibrar (válido por 30 segundos)
+      const deltaX = mouseX - lastMousePos.mouseX;
+      const deltaY = mouseY - lastMousePos.mouseY;
+      
+      // Fator de escala baseado no zoom aparente (ajustável)
+      const scaleFactor = 1.0; // Pode ser ajustado baseado no zoom do mapa
+      
+      const worldX = Math.floor(lastCoords.worldX + (deltaX * scaleFactor));
+      const worldY = Math.floor(lastCoords.worldY + (deltaY * scaleFactor));
+      
+      console.log(`🎯 Coords calibradas - Delta: (${deltaX}, ${deltaY}), Scale: ${scaleFactor}, Mundo: (${worldX}, ${worldY})`);
+      
+      return { worldX, worldY };
+    }
+    
+    // Fallback mais inteligente baseado na posição relativa
+    if (lastCoords) {
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const offsetX = Math.floor((mouseX - centerX) * 0.8); // Fator ajustável
+      const offsetY = Math.floor((mouseY - centerY) * 0.8);
+      
+      const worldX = lastCoords.worldX + offsetX;
+      const worldY = lastCoords.worldY + offsetY;
+      
+      console.log(`🎯 Coords offset - Centro: (${centerX}, ${centerY}), Offset: (${offsetX}, ${offsetY}), Mundo: (${worldX}, ${worldY})`);
+      
+      return { worldX, worldY };
+    }
+    
+    // Último recurso: coordenadas aproximadas
+    const normalizedX = mouseX / rect.width;
+    const normalizedY = mouseY / rect.height;
+    
+    const worldX = Math.floor(normalizedX * 2000);
+    const worldY = Math.floor(normalizedY * 2000);
+    
+    console.log(`🎯 Coords aproximadas - Mouse: (${mouseX}, ${mouseY}), Mundo: (${worldX}, ${worldY})`);
+    
+    return { worldX, worldY };
+  }
+
+  // Obtém as últimas coordenadas conhecidas dos cliques
+  function getLastKnownCoordinates() {
+    // Verifica se há coordenadas no apiManager
+    if (window.bmApiManager && window.bmApiManager.coordsTilePixel && window.bmApiManager.coordsTilePixel.length >= 4) {
+      const coords = window.bmApiManager.coordsTilePixel;
+      const worldX = parseInt(coords[0]) * 1000 + parseInt(coords[2]);
+      const worldY = parseInt(coords[1]) * 1000 + parseInt(coords[3]);
+      console.log(`🎯 Usando coordenadas do apiManager: (${worldX}, ${worldY})`);
+      return { worldX, worldY };
+    }
+    
+    // Fallback: tenta pegar do localStorage ou outras fontes
+    try {
+      const savedCoords = loadLastCoordinates();
+      if (savedCoords) {
+        console.log(`🎯 Usando coordenadas salvas: ${JSON.stringify(savedCoords)}`);
+        return savedCoords;
+      }
+    } catch (error) {
+      console.warn('Erro ao carregar coordenadas salvas:', error);
+    }
+    
+    return null;
+  }
+
+  // Atualiza o conteúdo do tooltip
+  async function updateTooltipContent(worldX, worldY) {
+    const tileX = Math.floor(worldX / 1000);
+    const tileY = Math.floor(worldY / 1000);
+    const pixelX = worldX % 1000;
+    const pixelY = worldY % 1000;
+
+    let content = `Coordenadas: (${worldX}, ${worldY})\n`;
+    content += `Tile: (${tileX}, ${tileY}) Pixel: (${pixelX}, ${pixelY})`;
+
+    try {
+      const templatePixel = await templateManager.getTemplateColorAtPixel(worldX, worldY);
+      if (templatePixel) {
+        const hexColor = `#${templatePixel.r.toString(16).padStart(2, '0')}${templatePixel.g.toString(16).padStart(2, '0')}${templatePixel.b.toString(16).padStart(2, '0')}`;
+        const wplaceColor = templateManager.findClosestWplaceColor(templatePixel.r, templatePixel.g, templatePixel.b);
+        
+        content += `\nTemplate: ${templatePixel.rgb} (${hexColor})`;
+        if (wplaceColor) {
+          content += ` → ${wplaceColor.name}`;
+        }
+      } else {
+        content += '\nTemplate: Não encontrado';
+      }
+    } catch (error) {
+      content += '\nTemplate: Erro ao obter cor';
+    }
+
+    tooltip.innerHTML = content.replace(/\n/g, '<br>');
+  }
+
+  // Event listeners para o canvas
+  function setupCanvasListeners() {
+    const canvas = getMainCanvas();
+    if (!canvas) {
+      setTimeout(setupCanvasListeners, 1000); // Tenta novamente em 1 segundo
+      return;
+    }
+
+    // Ativar/desativar tooltip com tecla Ctrl
+    document.addEventListener('keydown', (event) => {
+      if (event.ctrlKey && !isTooltipEnabled) {
+        isTooltipEnabled = true;
+        console.log('Template tooltip ativado - segure Ctrl e mova o mouse sobre o canvas');
+      }
+    });
+
+    document.addEventListener('keyup', (event) => {
+      if (!event.ctrlKey && isTooltipEnabled) {
+        isTooltipEnabled = false;
+        tooltip.style.opacity = '0';
+        clearTimeout(tooltipTimeout);
+        console.log('Template tooltip desativado');
+      }
+    });
+
+    // Mouse move no canvas
+    canvas.addEventListener('mousemove', async (event) => {
+      if (!isTooltipEnabled) return;
+
+      const coords = mouseToWorldCoords(event, canvas);
+      
+      // Debounce para evitar muitas chamadas
+      clearTimeout(tooltipTimeout);
+      tooltipTimeout = setTimeout(async () => {
+        await updateTooltipContent(coords.worldX, coords.worldY);
+        
+        // Posiciona o tooltip próximo ao cursor
+        tooltip.style.left = (event.clientX + 15) + 'px';
+        tooltip.style.top = (event.clientY - 10) + 'px';
+        tooltip.style.opacity = '1';
+      }, 100);
+    });
+
+    // Captura cliques para calibrar coordenadas
+    canvas.addEventListener('click', (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+      
+      // Salva a posição do mouse para calibração futura
+      window.bmLastMousePosition = {
+        mouseX: mouseX,
+        mouseY: mouseY,
+        timestamp: Date.now(),
+        canvasWidth: rect.width,
+        canvasHeight: rect.height
+      };
+      
+      console.log(`🎯 Click capturado - Mouse: (${mouseX}, ${mouseY}), Canvas: ${rect.width}x${rect.height}`);
+    });
+
+    // Esconde tooltip quando sai do canvas
+    canvas.addEventListener('mouseleave', () => {
+      tooltip.style.opacity = '0';
+      clearTimeout(tooltipTimeout);
+    });
+  }
+
+  // Inicia a configuração dos listeners
+  setupCanvasListeners();
 }

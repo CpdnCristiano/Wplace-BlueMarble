@@ -276,6 +276,106 @@ export default class TemplateManager {
     return 'Unknown';
   }
 
+  /** Obtém a cor do template em uma coordenada específica do mundo
+   * @param {number} worldX - Coordenada X no sistema mundial
+   * @param {number} worldY - Coordenada Y no sistema mundial
+   * @returns {Promise<Object|null>} Objeto com informações da cor do pixel ou null se não encontrado
+   * @since 0.72.9
+   */
+  async getTemplateColorAtPixel(worldX, worldY) {
+    try {
+      // Procura por templates ativos que contenham essa coordenada
+      for (const template of this.templatesArray) {
+        if (!template.coords || !template.chunked) continue;
+
+        // Calcula qual tile contém essa coordenada mundial
+        const tileX = Math.floor(worldX / this.tileSize);
+        const tileY = Math.floor(worldY / this.tileSize);
+        const pixelX = worldX % this.tileSize;
+        const pixelY = worldY % this.tileSize;
+
+        // Cria a chave do tile no formato esperado
+        const tilePrefix = `${tileX.toString().padStart(4, '0')},${tileY
+          .toString()
+          .padStart(4, '0')}`;
+
+        // Procura por tiles que começam com essas coordenadas de tile
+        const matchingTileKey = Object.keys(template.chunked).find((key) =>
+          key.startsWith(tilePrefix)
+        );
+
+        if (matchingTileKey && template.chunked[matchingTileKey]) {
+          console.log(
+            `Encontrado tile: ${matchingTileKey} para coordenadas ${worldX},${worldY}`
+          );
+
+          const tileBitmap = template.chunked[matchingTileKey];
+
+          // Cria um canvas temporário para ler o pixel
+          const canvas = new OffscreenCanvas(
+            tileBitmap.width,
+            tileBitmap.height
+          );
+          const context = canvas.getContext('2d');
+          context.drawImage(tileBitmap, 0, 0);
+
+          // Calcula a posição do pixel dentro do tile considerando o drawMult
+          // O template usa drawMult = 3, então cada pixel é expandido para 3x3
+          const drawMult = this.drawMult;
+          const adjustedPixelX = pixelX * drawMult + Math.floor(drawMult / 2); // Centro do pixel expandido
+          const adjustedPixelY = pixelY * drawMult + Math.floor(drawMult / 2);
+
+          console.log(
+            `Pixel position: ${pixelX},${pixelY} -> Canvas position: ${adjustedPixelX},${adjustedPixelY}`
+          );
+
+          // Verifica se as coordenadas estão dentro dos limites do canvas
+          if (
+            adjustedPixelX >= 0 &&
+            adjustedPixelX < canvas.width &&
+            adjustedPixelY >= 0 &&
+            adjustedPixelY < canvas.height
+          ) {
+            const imageData = context.getImageData(
+              adjustedPixelX,
+              adjustedPixelY,
+              1,
+              1
+            );
+            const data = imageData.data;
+
+            console.log(
+              `Pixel data: r=${data[0]}, g=${data[1]}, b=${data[2]}, a=${data[3]}`
+            );
+
+            // Verifica se o pixel não é transparente
+            if (data[3] > 0) {
+              const r = data[0];
+              const g = data[1];
+              const b = data[2];
+
+              return {
+                r: r,
+                g: g,
+                b: b,
+                rgb: `rgb(${r},${g},${b})`,
+                alpha: data[3],
+              };
+            }
+          }
+        }
+      }
+
+      console.log(
+        `Nenhum template encontrado para coordenadas ${worldX},${worldY}`
+      );
+      return null; // Não encontrado
+    } catch (error) {
+      console.warn('Erro ao obter cor do template:', error);
+      return null;
+    }
+  }
+
   /** Retrieves the pixel art canvas.
    * If the canvas has been updated/replaced, it retrieves the new one.
    * @param {string} selector - The CSS selector to use to find the canvas.
@@ -577,6 +677,18 @@ export default class TemplateManager {
    */
   async drawTemplateOnTile(tileBlob, tileCoords) {
     const drawSize = this.tileSize * this.drawMult; // Draw multiplier
+
+    // Log das coordenadas originais do tile
+    console.log(
+      `🎯 drawTemplateOnTile - Tile original: [${tileCoords[0]}, ${tileCoords[1]}]`
+    );
+    console.log(
+      `🎯 drawTemplateOnTile - Coordenadas mundiais do tile: X=${
+        tileCoords[0] * 1000
+      }-${(tileCoords[0] + 1) * 1000}, Y=${tileCoords[1] * 1000}-${
+        (tileCoords[1] + 1) * 1000
+      }`
+    );
 
     tileCoords =
       tileCoords[0].toString().padStart(4, '0') +

@@ -178,6 +178,56 @@ export default class ApiManager {
 
               const text = `(Tl X: ${coordsTile[0]}, Tl Y: ${coordsTile[1]}, Px X: ${coordsPixel[0]}, Px Y: ${coordsPixel[1]})`;
 
+              // Obtém a cor do template nas coordenadas específicas
+              let templateColorInfo = '';
+              try {
+                // Converte coordenadas tile/pixel para coordenadas do mundo
+                const worldX =
+                  parseInt(coordsTile[0]) * 1000 + parseInt(coordsPixel[0]);
+                const worldY =
+                  parseInt(coordsTile[1]) * 1000 + parseInt(coordsPixel[1]);
+
+                // Usa o método do templateManager para obter a cor do template
+                this.templateManager
+                  .getTemplateColorAtPixel(worldX, worldY)
+                  .then((templatePixel) => {
+                    if (templatePixel) {
+                      const hexColor = `#${templatePixel.r
+                        .toString(16)
+                        .padStart(2, '0')}${templatePixel.g
+                        .toString(16)
+                        .padStart(2, '0')}${templatePixel.b
+                        .toString(16)
+                        .padStart(2, '0')}`;
+                      const wplaceColor =
+                        this.templateManager.findClosestWplaceColor(
+                          templatePixel.r,
+                          templatePixel.g,
+                          templatePixel.b
+                        );
+
+                      if (wplaceColor) {
+                        templateColorInfo = ` -> ${wplaceColor.name}`;
+                      } else {
+                        templateColorInfo = ` -> ${templatePixel.rgb} (${hexColor})`;
+                      }
+
+                      // Atualiza o texto com a informação da cor
+                      const updatedText = text + templateColorInfo;
+                      if (displayCoords) {
+                        displayCoords.textContent = updatedText;
+                      }
+                    }
+                  })
+                  .catch((error) => {
+                    console.warn('Erro ao obter cor do template:', error);
+                  });
+              } catch (error) {
+                console.warn(
+                  'Erro ao processar coordenadas do template:',
+                  error
+                );
+              }
               // If we could not find the addition coord span, we make it then update the textContent with the new coords
               if (!displayCoords) {
                 displayCoords = document.createElement('span');
