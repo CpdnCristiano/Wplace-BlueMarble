@@ -199,15 +199,17 @@ export default class ApiManager {
                         .padStart(2, '0')}${templatePixel.b
                         .toString(16)
                         .padStart(2, '0')}`;
-                      const wplaceColor =
-                        this.templateManager.findClosestWplaceColor(
+                      if (this.templateManager.convertToWplaceColors) {
+                        const wplaceColor = this.templateManager.findClosestWplaceColor(
                           templatePixel.r,
                           templatePixel.g,
                           templatePixel.b
                         );
-
-                      if (wplaceColor) {
-                        templateColorInfo = ` -> ${wplaceColor.name}`;
+                        if (wplaceColor) {
+                          templateColorInfo = ` -> ${wplaceColor.name}`;
+                        } else {
+                          templateColorInfo = ` -> ${templatePixel.rgb} (${hexColor})`;
+                        }
                       } else {
                         templateColorInfo = ` -> ${templatePixel.rgb} (${hexColor})`;
                       }

@@ -69,9 +69,25 @@ export default class TemplateManager {
     // Wplace color palette system
     this.wplaceColors = wplaceColors.colors || wplaceColors; // Support both formats
     this.colorCache = new Map(); // Cache for color matching results to improve performance
+    this.convertToWplaceColors = true; // Flag: convert template colors to Wplace palette when drawing/reading
     console.log(
       `Loaded ${this.wplaceColors.length} Wplace colors for matching`
     );
+  }
+
+  /** Enable/disable Wplace color conversion for templates
+   * @param {boolean} enabled
+   */
+  setConvertToWplaceColors(enabled) {
+    this.convertToWplaceColors = !!enabled;
+    // Invalidate caches so redraw uses the new mode
+    this.processedTiles.clear();
+    this.tilePixelCache.clear();
+    this.tileColorCache.clear();
+    // Trigger recalculation/redraw next time
+    if (typeof this.forceRecalculation === 'function') {
+      try { this.forceRecalculation(); } catch {}
+    }
   }
 
   /** Busca a cor Wplace mais próxima para uma determinada cor RGB
@@ -811,13 +827,15 @@ export default class TemplateManager {
         continue;
       }
 
-      // Convert original color to closest Wplace color
-      const wplaceColor = this.findClosestWplaceColor(r, g, b);
-      if (wplaceColor) {
-        data[i] = wplaceColor.rgbValues[0]; // Red
-        data[i + 1] = wplaceColor.rgbValues[1]; // Green
-        data[i + 2] = wplaceColor.rgbValues[2]; // Blue
-        // Keep original alpha
+      // Optionally convert original color to closest Wplace color
+      if (this.convertToWplaceColors) {
+        const wplaceColor = this.findClosestWplaceColor(r, g, b);
+        if (wplaceColor) {
+          data[i] = wplaceColor.rgbValues[0]; // Red
+          data[i + 1] = wplaceColor.rgbValues[1]; // Green
+          data[i + 2] = wplaceColor.rgbValues[2]; // Blue
+          // Keep original alpha
+        }
       }
     }
 

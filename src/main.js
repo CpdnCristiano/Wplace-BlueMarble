@@ -694,6 +694,27 @@ function buildOverlayMain() {
     .buildElement()
     .addButton(
       {
+        id: 'bm-toggle-wplace-conv',
+        textContent: 'Wplace Colors: ON',
+        title: 'Alterna conversão de cores para a paleta Wplace',
+        style: 'margin-top: 6px; font-size: 11px; padding: 4px 8px;',
+      },
+      (builder, element) => {
+        // Estado inicial baseado no TemplateManager
+        const syncLabel = () => {
+          element.textContent = `Wplace Colors: ${templateManager.convertToWplaceColors ? 'ON' : 'OFF'}`;
+        };
+        syncLabel();
+        element.onclick = () => {
+          templateManager.setConvertToWplaceColors(!templateManager.convertToWplaceColors);
+          syncLabel();
+          builder.handleDisplayStatus(`Conversão para Wplace ${templateManager.convertToWplaceColors ? 'ativada' : 'desativada'}.`);
+        };
+      }
+    )
+    .buildElement()
+    .addButton(
+      {
         id: 'bm-show-details',
         textContent: 'Detalhes',
         style: 'margin-top: 10px;',
@@ -940,11 +961,14 @@ function setupTemplateTooltip(templateManager) {
       const templatePixel = await templateManager.getTemplateColorAtPixel(worldX, worldY);
       if (templatePixel) {
         const hexColor = `#${templatePixel.r.toString(16).padStart(2, '0')}${templatePixel.g.toString(16).padStart(2, '0')}${templatePixel.b.toString(16).padStart(2, '0')}`;
-        const wplaceColor = templateManager.findClosestWplaceColor(templatePixel.r, templatePixel.g, templatePixel.b);
         
         content += `\nTemplate: ${templatePixel.rgb} (${hexColor})`;
-        if (wplaceColor) {
-          content += ` → ${wplaceColor.name}`;
+        // Only append Wplace color name when conversion is enabled
+        if (templateManager.convertToWplaceColors) {
+          const wplaceColor = templateManager.findClosestWplaceColor(templatePixel.r, templatePixel.g, templatePixel.b);
+          if (wplaceColor) {
+            content += ` → ${wplaceColor.name}`;
+          }
         }
       } else {
         content += '\nTemplate: Não encontrado';
